@@ -1,0 +1,43 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id           String        @id @default(cuid())
+  telegramId   BigInt        @unique
+  username     String?
+  balance      Float         @default(0)
+  createdAt    DateTime      @default(now())
+  updatedAt    DateTime      @updatedAt
+  devices      Device[]
+  transactions Transaction[]
+}
+
+model Device {
+  id                String    @id @default(cuid())
+  userId            String
+  name              String    @default("Устройство")
+  marzbanUsername   String    @unique
+  vlessLink         String?
+  planId            String?
+  subscriptionUntil DateTime?
+  trialUsed         Boolean   @default(false)
+  createdAt         DateTime  @default(now())
+  user              User      @relation(fields: [userId], references: [id])
+}
+
+model Transaction {
+  id        String   @id @default(cuid())
+  userId    String
+  amount    Float
+  status    String   @default("PENDING")
+  lavaId    String?  @unique
+  orderId   String   @unique
+  createdAt DateTime @default(now())
+  user      User     @relation(fields: [userId], references: [id])
+}
