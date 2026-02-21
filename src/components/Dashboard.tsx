@@ -7,6 +7,7 @@ import { BalanceCard } from "@/components/BalanceCard";
 import { DeviceCard } from "@/components/DeviceCard";
 import { TopUpDialog } from "@/components/TopUpDialog";
 import { VlessDialog } from "@/components/VlessDialog";
+import { AddDeviceDialog } from "@/components/AddDeviceDialog";
 import { toast } from "sonner";
 
 interface DeviceData {
@@ -40,6 +41,7 @@ export function Dashboard() {
   const [vlessDialogOpen, setVlessDialogOpen] = useState(false);
   const [newDeviceVless, setNewDeviceVless] = useState("");
   const [newDeviceName, setNewDeviceName] = useState("");
+  const [addDeviceDialogOpen, setAddDeviceDialogOpen] = useState(false);
 
   const fetchData = useCallback(async () => {
     try {
@@ -73,7 +75,15 @@ export function Dashboard() {
     if (isReady && !isTelegram) setLoading(false);
   }, [isReady, isTelegram, fetchData]);
 
-  const handleAddDevice = async () => {
+  const handleAddDevice = () => {
+    if (trialUsed) {
+      setAddDeviceDialogOpen(true);
+    } else {
+      handleAddTrialDevice();
+    }
+  };
+
+  const handleAddTrialDevice = async () => {
     setAddingDevice(true);
     try {
       const res = await apiFetch("/api/devices", {
@@ -93,11 +103,38 @@ export function Dashboard() {
         setVlessDialogOpen(true);
       }
 
-      if (data.trialDays > 0) {
-        toast.success(`Устройство добавлено! ${data.trialDays} дня бесплатно`);
-      } else {
-        toast.success("Устройство добавлено. Выберите тариф для активации.");
+      toast.success(`Устройство добавлено! ${data.trialDays} дня бесплатно`);
+      await fetchData();
+    } catch {
+      toast.error("Ошибка соединения");
+    } finally {
+      setAddingDevice(false);
+    }
+  };
+
+  const handleAddDeviceWithPlan = async (planId: string) => {
+    setAddingDevice(true);
+    try {
+      const res = await apiFetch("/api/devices", {
+        method: "POST",
+        body: JSON.stringify({ planId }),
+      });
+      const data = await res.json();
+
+      if (!res.ok) {
+        toast.error(data.error || "Не удалось добавить устройство");
+        return;
       }
+
+      setAddDeviceDialogOpen(false);
+
+      if (data.vlessLink) {
+        setNewDeviceVless(data.vlessLink);
+        setNewDeviceName(data.name || "Устройство");
+        setVlessDialogOpen(true);
+      }
+
+      toast.success(`Устройство создано! Подписка на ${data.days} дней`);
       await fetchData();
     } catch {
       toast.error("Ошибка соединения");
@@ -270,6 +307,15 @@ export function Dashboard() {
           </p>
         )}
       </div>
+
+      <AddDeviceDialog
+        open={addDeviceDialogOpen}
+        onOpenChange={setAddDeviceDialogOpen}
+        balance={balance}
+        loading={addingDevice}
+        onConfirm={handleAddDeviceWithPlan}
+        onTopUp={() => setTopUpOpen(true)}
+      />
 
       <TopUpDialog
         open={topUpOpen}

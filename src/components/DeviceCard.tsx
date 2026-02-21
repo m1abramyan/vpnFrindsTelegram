@@ -3,6 +3,12 @@
 import { useState } from "react";
 import { formatDate } from "@/lib/utils";
 import { toast } from "sonner";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 
 interface Plan {
   id: string;
@@ -46,6 +52,7 @@ export function DeviceCard({
   const [showPlans, setShowPlans] = useState(false);
   const [selected, setSelected] = useState("2months");
   const [confirmDelete, setConfirmDelete] = useState(false);
+  const [showTrialDeleteDialog, setShowTrialDeleteDialog] = useState(false);
   const [deleting, setDeleting] = useState(false);
 
   const currentPlan = PLANS.find((p) => p.id === selected)!;
@@ -95,7 +102,13 @@ export function DeviceCard({
           </span>
           {!confirmDelete ? (
             <button
-              onClick={() => setConfirmDelete(true)}
+              onClick={() => {
+                if (device.trialUsed) {
+                  setShowTrialDeleteDialog(true);
+                } else {
+                  setConfirmDelete(true);
+                }
+              }}
               className="text-gray-600 hover:text-red-400 transition-colors p-0.5"
               title="Удалить устройство"
             >
@@ -111,6 +124,7 @@ export function DeviceCard({
                   setDeleting(true);
                   await onDelete(device.id);
                   setDeleting(false);
+                  setConfirmDelete(false);
                 }}
                 disabled={deleting}
                 className="text-[10px] bg-red-500/80 hover:bg-red-500 text-white px-2 py-0.5 rounded-md font-medium disabled:opacity-50"
@@ -153,6 +167,48 @@ export function DeviceCard({
           </button>
         </div>
       )}
+
+      <Dialog open={showTrialDeleteDialog} onOpenChange={setShowTrialDeleteDialog}>
+        <DialogContent className="bg-[#161616] border-[#222] text-white max-w-sm rounded-2xl">
+          <DialogHeader>
+            <DialogTitle className="text-center text-base">
+              Удалить устройство?
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 py-2">
+            <div className="bg-red-500/10 border border-red-500/20 rounded-xl p-3">
+              <p className="text-xs text-red-300 text-center leading-relaxed">
+                Бесплатный период больше не будет доступен для этого аккаунта. Вы точно хотите удалить устройство?
+              </p>
+            </div>
+            {device.isActive && daysLeft > 0 && (
+              <p className="text-xs text-gray-400 text-center">
+                Оставшийся срок: {daysLeft} {daysLeft === 1 ? "день" : daysLeft < 5 ? "дня" : "дней"}
+              </p>
+            )}
+            <div className="flex gap-2">
+              <button
+                onClick={() => setShowTrialDeleteDialog(false)}
+                className="flex-1 bg-[#222] hover:bg-[#2a2a2a] text-gray-300 text-xs font-medium rounded-xl h-10 transition-all border border-[#333]"
+              >
+                Отмена
+              </button>
+              <button
+                onClick={async () => {
+                  setDeleting(true);
+                  await onDelete(device.id);
+                  setDeleting(false);
+                  setShowTrialDeleteDialog(false);
+                }}
+                disabled={deleting}
+                className="flex-1 bg-red-500 hover:bg-red-600 text-white text-xs font-semibold rounded-xl h-10 transition-all disabled:opacity-50"
+              >
+                {deleting ? "Удаление..." : "Удалить"}
+              </button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
 
       {!device.isActive || showPlans ? (
         <div className="space-y-2 pt-1">
