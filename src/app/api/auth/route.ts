@@ -15,6 +15,7 @@ export async function POST(request: Request) {
       telegramId: user.telegramId.toString(),
       username: user.username,
       balance: user.balance,
+      trialUsed: user.trialUsed,
     });
   } catch (error) {
     console.error("Auth error:", error);

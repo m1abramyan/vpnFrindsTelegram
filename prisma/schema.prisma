@@ -12,6 +12,7 @@ model User {
   telegramId   BigInt        @unique
   username     String?
   balance      Float         @default(0)
+  trialUsed    Boolean       @default(false)
   createdAt    DateTime      @default(now())
   updatedAt    DateTime      @updatedAt
   devices      Device[]

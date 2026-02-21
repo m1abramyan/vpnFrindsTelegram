@@ -9,6 +9,7 @@ export interface AuthUser {
   telegramId: bigint;
   username: string | null;
   balance: number;
+  trialUsed: boolean;
 }
 
 export function debugAuth(request: Request) {
@@ -42,6 +43,7 @@ async function getOrCreateDevUser(): Promise<AuthUser> {
     telegramId: user.telegramId,
     username: user.username,
     balance: user.balance,
+    trialUsed: user.trialUsed,
   };
 }
 
@@ -93,5 +95,6 @@ export async function authenticateRequest(
     telegramId: user.telegramId,
     username: user.username,
     balance: user.balance,
+    trialUsed: user.trialUsed,
   };
 }

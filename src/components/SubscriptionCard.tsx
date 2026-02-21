@@ -12,9 +12,9 @@ interface Plan {
 }
 
 const PLANS: Plan[] = [
-  { id: "1month", label: "30 дней", price: 199, days: 30 },
-  { id: "3months", label: "90 дней", price: 449, days: 90, badge: "Хит" },
-  { id: "1year", label: "365 дней", price: 1499, days: 365 },
+  { id: "1month", label: "1 месяц", price: 99, days: 30 },
+  { id: "2months", label: "2 месяца", price: 169, days: 60, badge: "Хит" },
+  { id: "3months", label: "3 месяца", price: 249, days: 90 },
 ];
 
 const MAX_DEVICES = 5;
@@ -36,7 +36,7 @@ export function SubscriptionCard({
 }: SubscriptionCardProps) {
   const isActive = subscriptionUntil && new Date(subscriptionUntil) > new Date();
   const [showPlans, setShowPlans] = useState(false);
-  const [selected, setSelected] = useState("3months");
+  const [selected, setSelected] = useState("2months");
   const currentPlan = PLANS.find((p) => p.id === selected)!;
   const canAfford = balance >= currentPlan.price;
 

@@ -28,6 +28,7 @@ interface DevicesResponse {
 export function Dashboard() {
   const { apiFetch, isReady, isTelegram } = useTelegram();
   const [balance, setBalance] = useState(0);
+  const [trialUsed, setTrialUsed] = useState(true);
   const [telegramId, setTelegramId] = useState<string | null>(null);
   const [devices, setDevices] = useState<DeviceData[]>([]);
   const [maxDevices, setMaxDevices] = useState(5);
@@ -50,6 +51,7 @@ export function Dashboard() {
       }
       const authData = await authRes.json();
       setBalance(authData.balance);
+      setTrialUsed(authData.trialUsed ?? true);
       setTelegramId(authData.telegramId);
 
       const devicesRes = await apiFetch("/api/devices");
@@ -89,8 +91,12 @@ export function Dashboard() {
         setNewDeviceVless(data.vlessLink);
         setNewDeviceName(data.name || "Устройство");
         setVlessDialogOpen(true);
-      } else {
+      }
+
+      if (data.trialDays > 0) {
         toast.success(`Устройство добавлено! ${data.trialDays} дня бесплатно`);
+      } else {
+        toast.success("Устройство добавлено. Выберите тариф для активации.");
       }
       await fetchData();
     } catch {
@@ -140,7 +146,18 @@ export function Dashboard() {
         return;
       }
 
-      toast.success("Устройство удалено");
+      if (data.trialMessage) {
+        const days = data.remainingDays ?? 0;
+        const daysText = days > 0
+          ? `Оставалось ${days} ${days === 1 ? "день" : days < 5 ? "дня" : "дней"}.`
+          : "";
+        toast.info(
+          `Устройство удалено. ${daysText} ${data.trialMessage}`,
+          { duration: 6000 }
+        );
+      } else {
+        toast.success("Устройство удалено");
+      }
       await fetchData();
     } catch {
       toast.error("Ошибка соединения");
@@ -205,7 +222,11 @@ export function Dashboard() {
                 </svg>
               </div>
               <p className="text-sm text-gray-400">Нет подключённых устройств</p>
-              <p className="text-xs text-gray-600">Добавьте устройство и получите 3 дня бесплатно</p>
+              <p className="text-xs text-gray-600">
+                {trialUsed
+                  ? "Добавьте устройство и выберите тариф"
+                  : "Добавьте устройство и получите 3 дня бесплатно"}
+              </p>
             </div>
           )}
 

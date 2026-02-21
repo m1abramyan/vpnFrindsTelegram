@@ -13,9 +13,9 @@ interface Plan {
 }
 
 const PLANS: Plan[] = [
-  { id: "1month", label: "30 дней", price: 199, days: 30 },
-  { id: "3months", label: "90 дней", price: 449, days: 90, badge: "Хит" },
-  { id: "1year", label: "365 дней", price: 1499, days: 365 },
+  { id: "1month", label: "30 дней", price: 99, days: 30 },
+  { id: "2months", label: "60 дней", price: 169, days: 60, badge: "Хит" },
+  { id: "3months", label: "90 дней", price: 249, days: 90 },
 ];
 
 interface DeviceData {
@@ -44,7 +44,7 @@ export function DeviceCard({
   subscribing,
 }: DeviceCardProps) {
   const [showPlans, setShowPlans] = useState(false);
-  const [selected, setSelected] = useState("3months");
+  const [selected, setSelected] = useState("2months");
   const [confirmDelete, setConfirmDelete] = useState(false);
   const [deleting, setDeleting] = useState(false);
 
@@ -60,7 +60,9 @@ export function DeviceCard({
     ? daysLeft <= 3 && device.trialUsed && daysLeft > 0
       ? "Пробный период"
       : "Активно"
-    : "Истекло";
+    : device.subscriptionUntil
+      ? "Истекло"
+      : "Не активно";
 
   const statusColor = device.isActive ? "text-green-400" : "text-red-400";
   const statusBg = device.isActive ? "bg-green-500/10" : "bg-red-500/10";

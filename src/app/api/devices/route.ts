@@ -93,15 +93,22 @@ export async function POST(request: Request) {
 
     const marzbanUsername = `user${user.telegramId}_${deviceCount + 1}`;
 
-    const trialExpireSec = Math.floor(Date.now() / 1000) + TRIAL_DAYS * 24 * 60 * 60;
-    const trialExpireDate = new Date(trialExpireSec * 1000);
+    const grantTrial = !user.trialUsed;
 
     let marzbanUser;
     try {
-      marzbanUser = await createMarzbanUser(marzbanUsername, {
-        expire: trialExpireSec,
-        status: "active",
-      });
+      if (grantTrial) {
+        const trialExpireSec = Math.floor(Date.now() / 1000) + TRIAL_DAYS * 24 * 60 * 60;
+        marzbanUser = await createMarzbanUser(marzbanUsername, {
+          expire: trialExpireSec,
+          status: "active",
+        });
+      } else {
+        marzbanUser = await createMarzbanUser(marzbanUsername, {
+          expire: 0,
+          status: "disabled",
+        });
+      }
     } catch (err: unknown) {
       const message = err instanceof Error ? err.message : String(err);
       console.error("Marzban create device error:", message);
@@ -114,6 +121,10 @@ export async function POST(request: Request) {
     const vless = marzbanUser.links?.find((l: string) => l.startsWith("vless://"));
     const vlessLink = vless || marzbanUser.links?.[0] || null;
 
+    const trialExpireDate = grantTrial
+      ? new Date(Date.now() + TRIAL_DAYS * 24 * 60 * 60 * 1000)
+      : null;
+
     const device = await prisma.device.create({
       data: {
         userId: user.id,
@@ -121,9 +132,16 @@ export async function POST(request: Request) {
         marzbanUsername,
         vlessLink,
         subscriptionUntil: trialExpireDate,
-        trialUsed: true,
+        trialUsed: grantTrial,
       },
     });
+
+    if (grantTrial) {
+      await prisma.user.update({
+        where: { id: user.id },
+        data: { trialUsed: true },
+      });
+    }
 
     return NextResponse.json({
       id: device.id,
@@ -131,7 +149,7 @@ export async function POST(request: Request) {
       marzbanUsername: device.marzbanUsername,
       vlessLink: device.vlessLink,
       subscriptionUntil: device.subscriptionUntil,
-      trialDays: TRIAL_DAYS,
+      trialDays: grantTrial ? TRIAL_DAYS : 0,
     });
   } catch (error) {
     console.error("Devices POST error:", error);
@@ -164,6 +182,15 @@ export async function DELETE(request: Request) {
       return NextResponse.json({ error: "Device not found" }, { status: 404 });
     }
 
+    let remainingDays = 0;
+    let remainingUntil: string | null = null;
+    if (device.subscriptionUntil && new Date(device.subscriptionUntil) > new Date()) {
+      remainingDays = Math.max(0, Math.ceil(
+        (new Date(device.subscriptionUntil).getTime() - Date.now()) / (1000 * 60 * 60 * 24)
+      ));
+      remainingUntil = device.subscriptionUntil.toISOString();
+    }
+
     try {
       await deleteMarzbanUser(device.marzbanUsername);
     } catch (err) {
@@ -172,7 +199,15 @@ export async function DELETE(request: Request) {
 
     await prisma.device.delete({ where: { id: deviceId } });
 
-    return NextResponse.json({ success: true });
+    const response: Record<string, unknown> = { success: true };
+
+    if (device.trialUsed) {
+      response.remainingDays = remainingDays;
+      response.remainingUntil = remainingUntil;
+      response.trialMessage = "Пробный период доступен только один раз и больше не будет предоставлен для этого аккаунта.";
+    }
+
+    return NextResponse.json(response);
   } catch (error) {
     console.error("Devices DELETE error:", error);
     return NextResponse.json(

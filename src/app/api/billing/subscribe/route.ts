@@ -4,9 +4,9 @@ import { updateMarzbanUser, getMarzbanUser } from "@/lib/marzban";
 import { prisma } from "@/lib/prisma";
 
 const VALID_PLANS: Record<string, { price: number; days: number }> = {
-  "1month": { price: 199, days: 30 },
-  "3months": { price: 449, days: 90 },
-  "1year": { price: 1499, days: 365 },
+  "1month": { price: 99, days: 30 },
+  "2months": { price: 169, days: 60 },
+  "3months": { price: 249, days: 90 },
 };
 
 export async function POST(request: Request) {

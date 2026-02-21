@@ -248,7 +248,7 @@ const LandingPage = () => (
         <div className="grid md:grid-cols-3 gap-8 max-w-5xl mx-auto">
           <PricingCard
             title="1 месяц"
-            price="199 ₽"
+            price="99 ₽"
             subtitle="Идеально для старта"
             features={[
               "Неограниченный трафик",
@@ -257,26 +257,26 @@ const LandingPage = () => (
             ]}
           />
           <PricingCard
-            title="3 месяца"
-            price="449 ₽"
+            title="2 месяца"
+            price="169 ₽"
             subtitle="Оптимальный выбор"
             features={[
               "Неограниченный трафик",
               "Поддержка 24/7",
               "Высокая скорость",
-              "Скидка ~25%",
+              "Скидка ~15%",
             ]}
             isPopular
           />
           <PricingCard
-            title="1 год"
-            price="1499 ₽"
+            title="3 месяца"
+            price="249 ₽"
             subtitle="Максимальная выгода"
             features={[
               "Неограниченный трафик",
               "Поддержка 24/7",
               "Высокая скорость",
-              "Скидка ~37%",
+              "Скидка ~16%",
             ]}
           />
         </div>

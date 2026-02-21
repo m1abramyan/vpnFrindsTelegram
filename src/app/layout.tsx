@@ -12,7 +12,7 @@ const inter = Inter({
 export const metadata: Metadata = {
   title: "VPN Friends — Защита личных данных и анонимный серфинг",
   description:
-    "VPN Friends — надёжный VPN-сервис для России. Защита личных данных, анонимный серфинг, высокая скорость. Подключение через Telegram за минуту. Тарифы от 199 ₽.",
+    "VPN Friends — надёжный VPN-сервис для России. Защита личных данных, анонимный серфинг, высокая скорость. Подключение через Telegram за минуту. Тарифы от 99 ₽.",
   keywords:
     "VPN, защита личных данных, анонимный серфинг, безопасный интернет, VPN Telegram, конфиденциальность",
   authors: [{ name: "VPN Friends" }],
@@ -22,7 +22,7 @@ export const metadata: Metadata = {
     url: "https://vpnfriends.ru/",
     title: "VPN Friends — Защита личных данных и анонимный серфинг",
     description:
-      "Надёжный VPN для России. Защита данных, анонимный серфинг, подключение через Telegram. Тарифы от 199 ₽.",
+      "Надёжный VPN для России. Защита данных, анонимный серфинг, подключение через Telegram. Тарифы от 99 ₽.",
     images: [
       {
         url: "https://vpnfriends.ru/iconvpn.png",
@@ -102,7 +102,7 @@ export default function RootLayout({
                   url: "https://vpnfriends.ru/",
                   name: "VPN Friends — Защита личных данных и анонимный серфинг",
                   description:
-                    "Защита личных данных и анонимный серфинг. Тарифы от 199 ₽.",
+                    "Защита личных данных и анонимный серфинг. Тарифы от 99 ₽.",
                   isPartOf: { "@id": "https://vpnfriends.ru/#website" },
                   inLanguage: "ru-RU",
                   about: { "@id": "https://vpnfriends.ru/#organization" },
