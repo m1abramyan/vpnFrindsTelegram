@@ -41,9 +41,29 @@ npm run dev
 | `SUBSCRIPTION_PRICE` | Цена подписки на 30 дней (в рублях) |
 | `NEXT_PUBLIC_APP_URL` | URL приложения (для вебхуков и редиректов) |
 
+## Telegram Bot
+
+Бот обрабатывает команду `/start` — отправляет приветственное сообщение с инструкциями по установке VPN-клиентов и кнопкой для открытия Mini App.
+
+```bash
+# Разработка (без компиляции)
+npm run bot:dev
+
+# Сборка и запуск
+npm run bot:build
+npm run bot:start
+
+# На сервере через PM2
+pm2 start bot/dist/index.js --name vpn-bot
+pm2 save
+```
+
 ## Структура проекта
 
 ```
+bot/
+  index.ts            — Telegram bot (приветственное сообщение /start)
+  tsconfig.json       — конфигурация компиляции бота
 src/
   app/
     api/
