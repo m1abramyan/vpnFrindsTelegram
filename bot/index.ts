@@ -8,7 +8,7 @@ if (!token) {
 
 const bot = new Bot(token);
 
-const WELCOME_TEXT = `Добро пожаловать в FrendikVPN! 🛡
+const WELCOME_TEXT = `Добро пожаловать в Friends VPN! 🛡
 
 Быстрый, надёжный и безопасный VPN для всех устройств.
 
@@ -33,9 +33,17 @@ const keyboard = new InlineKeyboard().webApp(
   "https://frendik.ru",
 );
 
-bot.command("start", (ctx) =>
-  ctx.reply(WELCOME_TEXT, { reply_markup: keyboard }),
-);
+const lastWelcome = new Map<number, number>();
+
+bot.command("start", async (ctx) => {
+  const chatId = ctx.chat.id;
+  const prev = lastWelcome.get(chatId);
+  if (prev) {
+    await ctx.api.deleteMessage(chatId, prev).catch(() => {});
+  }
+  const msg = await ctx.reply(WELCOME_TEXT, { reply_markup: keyboard });
+  lastWelcome.set(chatId, msg.message_id);
+});
 
 bot.start();
 console.log("Bot started");
